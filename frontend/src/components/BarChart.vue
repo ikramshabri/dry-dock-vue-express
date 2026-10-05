@@ -2,26 +2,24 @@
 import { computed, ref } from "vue";
 
 const props = defineProps({
-  groups: { type: Array, required: true }, // [{ label, values: [..] }]
-  series: { type: Array, required: true }, // [{ name, color }]
+  groups: { type: Array, required: true },
+  series: { type: Array, required: true },
 });
 
 const hovered = ref(null);
 
-// bulatkan skala sumbu Y ke angka yang mudah dibaca (50, 100, 250, ...)
 function niceStep(value) {
   const power = 10 ** Math.floor(Math.log10(value));
   const n = value / power;
   return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * power;
 }
 
-// tanpa data, skala default 0-100 supaya sumbu tetap rapi
 const maxValue = computed(
   () => Math.max(0, ...props.groups.flatMap((g) => g.values)) || 100,
 );
 const step = computed(() => niceStep(maxValue.value / 6));
 const top = computed(() => Math.ceil(maxValue.value / step.value) * step.value);
-// dibulatkan untuk menghindari galat floating point seperti 0.6000000000000001
+
 const ticks = computed(() =>
   Array.from({ length: Math.round(top.value / step.value) + 1 }, (_, i) =>
     Number((i * step.value).toFixed(6)),

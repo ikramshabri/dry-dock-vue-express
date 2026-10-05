@@ -1,11 +1,10 @@
-import { ref } from 'vue';
+import { ref } from "vue";
 
-// logika CRUD yang dipakai bersama oleh semua halaman
 export function useCrud(service, { defaults, params = () => ({}) }) {
   const items = ref([]);
   const form = ref(defaults());
   const editingId = ref(null);
-  const error = ref('');
+  const error = ref("");
 
   async function load() {
     try {
@@ -26,7 +25,7 @@ export function useCrud(service, { defaults, params = () => ({}) }) {
   }
 
   async function save() {
-    error.value = '';
+    error.value = "";
     try {
       if (editingId.value) {
         await service.update(editingId.value, form.value);
@@ -41,8 +40,8 @@ export function useCrud(service, { defaults, params = () => ({}) }) {
   }
 
   async function remove(id) {
-    if (!confirm('Hapus data ini?')) return;
-    error.value = '';
+    if (!confirm("Hapus data ini?")) return;
+    error.value = "";
     try {
       await service.remove(id);
       await load();

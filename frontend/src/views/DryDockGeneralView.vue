@@ -1,34 +1,44 @@
 <script setup>
-import { computed, inject, onMounted, ref, watch } from 'vue';
-import CrudPage from '../components/CrudPage.vue';
-import CostSummary from '../components/CostSummary.vue';
-import DonutChart from '../components/DonutChart.vue';
-import BarChart from '../components/BarChart.vue';
+import { computed, inject, onMounted, ref, watch } from "vue";
+import CrudPage from "../components/CrudPage.vue";
+import CostSummary from "../components/CostSummary.vue";
+import DonutChart from "../components/DonutChart.vue";
+import BarChart from "../components/BarChart.vue";
 import {
-  dryDockService, shipyardService, workOrderService, attachmentService, purchaseOrderService,
-} from '../services';
-import { workOrderFields, attachmentFields, purchaseOrderFields } from '../config/fields';
-import { workOrderRow, attachmentRow } from '../config/rows';
-import { formatDate } from '../utils/format';
+  dryDockService,
+  shipyardService,
+  workOrderService,
+  attachmentService,
+  purchaseOrderService,
+} from "../services";
+import {
+  workOrderFields,
+  attachmentFields,
+  purchaseOrderFields,
+} from "../config/fields";
+import { workOrderRow, attachmentRow } from "../config/rows";
+import { formatDate } from "../utils/format";
 
 const props = defineProps({ id: { type: String, required: true } });
 
-const dock = inject('dock');
-const reloadDock = inject('reloadDock');
+const dock = inject("dock");
+const reloadDock = inject("reloadDock");
 
 const summary = ref(null);
 const shipyards = ref([]);
-const shipyardId = ref('');
-const error = ref('');
+const shipyardId = ref("");
+const error = ref("");
 
 const statusColors = {
-  open: '#0a95f5',
-  in_progress: '#62a346',
-  on_hold: '#e8669d',
-  complete: '#00a0c8',
+  open: "#0a95f5",
+  in_progress: "#62a346",
+  on_hold: "#e8669d",
+  complete: "#00a0c8",
 };
 
-watch(dock, (value) => (shipyardId.value = value?.shipyard_id ?? ''), { immediate: true });
+watch(dock, (value) => (shipyardId.value = value?.shipyard_id ?? ""), {
+  immediate: true,
+});
 
 async function reloadSummary() {
   summary.value = await dryDockService.summary(props.id);
@@ -44,7 +54,7 @@ async function refresh() {
 }
 
 async function patch(data) {
-  error.value = '';
+  error.value = "";
   try {
     await dryDockService.patch(props.id, data);
     await refresh();
@@ -54,7 +64,7 @@ async function patch(data) {
 }
 
 async function startDryDock() {
-  error.value = '';
+  error.value = "";
   try {
     await dryDockService.start(props.id);
     await refresh();
@@ -64,50 +74,62 @@ async function startDryDock() {
 }
 
 const info = computed(() => [
-  ['Dry Dock No', dock.value.dry_dock_no],
-  ['Description', dock.value.description],
-  ['Company', dock.value.company],
-  ['Account Code', dock.value.account_code],
-  ['Responsible Rank', dock.value.responsible_rank],
-  ['Budget', `${Number(dock.value.budget ?? 0).toLocaleString('en-US')}${dock.value.currency === 'USD' ? '$' : ` ${dock.value.currency ?? ''}`}`],
-  ['Currency', dock.value.currency],
+  ["Dry Dock No", dock.value.dry_dock_no],
+  ["Description", dock.value.description],
+  ["Company", dock.value.company],
+  ["Account Code", dock.value.account_code],
+  ["Responsible Rank", dock.value.responsible_rank],
+  [
+    "Budget",
+    `${Number(dock.value.budget ?? 0).toLocaleString("en-US")}${dock.value.currency === "USD" ? "$" : ` ${dock.value.currency ?? ""}`}`,
+  ],
+  ["Currency", dock.value.currency],
 ]);
 
 const dates = computed(() => [
-  ['Planned Start Date', formatDate(dock.value.planned_start)],
-  ['Planned End Date', formatDate(dock.value.planned_end)],
-  ['Actual Start Date', formatDate(dock.value.actual_start)],
-  ['Actual End Date', formatDate(dock.value.actual_end)],
+  ["Planned Start Date", formatDate(dock.value.planned_start)],
+  ["Planned End Date", formatDate(dock.value.planned_end)],
+  ["Actual Start Date", formatDate(dock.value.actual_start)],
+  ["Actual End Date", formatDate(dock.value.actual_end)],
 ]);
 
 const statusSlices = computed(() =>
   Object.entries(statusColors).map(([status, color]) => ({
-    label: status.replace('_', ' '),
+    label: status.replace("_", " "),
     value: summary.value?.statuses.find((s) => s.status === status)?.total ?? 0,
     color,
-  }))
+  })),
 );
 
 const days = (from, to) =>
-  from && to ? Math.max(0, Math.round((new Date(to) - new Date(from)) / 86400000)) : 0;
+  from && to
+    ? Math.max(0, Math.round((new Date(to) - new Date(from)) / 86400000))
+    : 0;
 
-// lama yard stay dihitung dari tanggal rencana dan tanggal aktual
 const staySlices = computed(() => [
-  { label: 'Planned Days', value: days(dock.value.planned_start, dock.value.planned_end), color: '#0a95f5' },
-  { label: 'Actual Days', value: days(dock.value.actual_start, dock.value.actual_end), color: '#62a346' },
+  {
+    label: "Planned Days",
+    value: days(dock.value.planned_start, dock.value.planned_end),
+    color: "#0a95f5",
+  },
+  {
+    label: "Actual Days",
+    value: days(dock.value.actual_start, dock.value.actual_end),
+    color: "#62a346",
+  },
 ]);
 
 const barSeries = [
-  { name: 'Total Costs', color: '#0a95f5' },
-  { name: 'Total Estimates', color: '#62a346' },
-  { name: 'Total Budget', color: '#e8669d' },
+  { name: "Total Costs", color: "#0a95f5" },
+  { name: "Total Estimates", color: "#62a346" },
+  { name: "Total Budget", color: "#e8669d" },
 ];
 
 const barGroups = computed(() =>
   (summary.value?.groups ?? []).map((g) => ({
     label: g.name,
     values: [g.total_costs, g.total_estimates, g.total_budget],
-  }))
+  })),
 );
 
 onMounted(async () => {
@@ -123,7 +145,12 @@ onMounted(async () => {
 <template>
   <div class="banner">
     <div class="banner-left">
-      <img v-if="dock.vessel_image" :src="dock.vessel_image" class="ship" alt="" />
+      <img
+        v-if="dock.vessel_image"
+        :src="dock.vessel_image"
+        class="ship"
+        alt=""
+      />
       <div v-else class="ship"></div>
       <div>
         <small>{{ dock.vessel_name }}</small>
@@ -131,7 +158,11 @@ onMounted(async () => {
         <div>{{ dock.description }}</div>
       </div>
     </div>
-    <button class="light" :disabled="dock.status !== 'planning'" @click="startDryDock">
+    <button
+      class="light"
+      :disabled="dock.status !== 'planning'"
+      @click="startDryDock"
+    >
       Start Dry Dock
     </button>
   </div>
@@ -141,7 +172,7 @@ onMounted(async () => {
     <div class="info">
       <div v-for="[label, value] in info" :key="label">
         <small>{{ label }}</small>
-        <div>{{ value || '-' }}</div>
+        <div>{{ value || "-" }}</div>
       </div>
     </div>
     <div class="info dates">
@@ -157,20 +188,31 @@ onMounted(async () => {
           Shipyard
           <select v-model="shipyardId">
             <option value="">-</option>
-            <option v-for="y in shipyards" :key="y.id" :value="y.id">{{ y.name }}</option>
+            <option v-for="y in shipyards" :key="y.id" :value="y.id">
+              {{ y.name }}
+            </option>
           </select>
         </label>
-        <button class="spaced" @click="patch({ shipyard_id: shipyardId })">SELECT SHIPYARD</button>
+        <button class="spaced" @click="patch({ shipyard_id: shipyardId })">
+          SELECT SHIPYARD
+        </button>
       </div>
       <p class="hint">
-        {{ dock.shipyard_name ? `Shipyard: ${dock.shipyard_name}` : 'No Shipyard Selected' }}
+        {{
+          dock.shipyard_name
+            ? `Shipyard: ${dock.shipyard_name}`
+            : "No Shipyard Selected"
+        }}
       </p>
     </div>
 
     <div class="card row">
       <label class="narrow">
         Priority
-        <select :value="dock.priority" @change="patch({ priority: $event.target.value })">
+        <select
+          :value="dock.priority"
+          @change="patch({ priority: $event.target.value })"
+        >
           <option value="low">Low</option>
           <option value="medium">Medium</option>
           <option value="high">High</option>
@@ -195,7 +237,11 @@ onMounted(async () => {
 
   <section v-if="summary">
     <h2>Cost Summary</h2>
-    <CostSummary :summary="summary" :currency="dock.currency === 'USD' ? '$' : dock.currency ?? ''" :columns="5" />
+    <CostSummary
+      :summary="summary"
+      :currency="dock.currency === 'USD' ? '$' : (dock.currency ?? '')"
+      :columns="5"
+    />
 
     <div class="charts">
       <div class="card">

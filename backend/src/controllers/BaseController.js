@@ -3,7 +3,6 @@ class BaseController {
     this.model = model;
   }
 
-  // supaya error dari async function masuk ke error handler express
   handle(fn) {
     return (req, res, next) => Promise.resolve(fn(req, res)).catch(next);
   }

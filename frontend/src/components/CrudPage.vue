@@ -14,14 +14,14 @@ const props = defineProps({
   fixed: { type: Object, default: () => ({}) },
   groupBy: { type: String, default: null },
   editable: { type: Boolean, default: true },
-  layout: { type: String, default: "table" }, // table | list | details
-  row: { type: Object, default: () => ({}) }, // dipakai layout list
+  layout: { type: String, default: "table" },
+  row: { type: Object, default: () => ({}) },
   addLabel: { type: String, default: "Add" },
   headingTag: { type: String, default: "h1" },
   filterKey: { type: String, default: null },
   numbered: { type: Boolean, default: false },
-  tableColumns: { type: Array, default: null }, // kolom tabel khusus, selain dari fields
-  rowTo: { type: Function, default: null }, // tujuan navigasi saat baris diklik
+  tableColumns: { type: Array, default: null },
+  rowTo: { type: Function, default: null },
   hideHeader: { type: Boolean, default: false },
   sortOrder: { type: String, default: null },
 });
@@ -103,7 +103,6 @@ const visible = computed(() => {
   return rows.sort((a, b) => (a.id - b.id) * direction);
 });
 
-// kelompokkan per kolom groupBy, urutan grup mengikuti urutan opsi
 const groups = computed(() => {
   if (!props.groupBy) return [{ name: null, rows: visible.value }];
 

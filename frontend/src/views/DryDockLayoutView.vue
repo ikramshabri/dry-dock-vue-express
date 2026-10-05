@@ -1,7 +1,7 @@
 <script setup>
-import { computed, nextTick, onMounted, provide, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { dryDockService } from '../services';
+import { computed, nextTick, onMounted, provide, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { dryDockService } from "../services";
 
 const props = defineProps({ id: { type: String, required: true } });
 
@@ -9,24 +9,22 @@ const route = useRoute();
 const router = useRouter();
 
 const dock = ref(null);
-const error = ref('');
-const toast = ref('');
-const activeSection = ref('general');
+const error = ref("");
+const toast = ref("");
+const activeSection = ref("general");
 
-// `section` = loncat ke bagian di halaman General, `page` = buka halaman sendiri
 const tabs = [
-  { label: 'General', section: 'general' },
-  { label: 'Specifications', section: 'specifications' },
-  { label: 'Tasks', page: 'tasks' },
-  { label: 'Sourcing', page: 'sourcing' },
-  { label: 'Execution', page: 'execution' },
-  { label: 'Reporting', page: 'reporting' },
-  { label: 'Costs', page: 'costs' },
-  { label: 'Purchase Orders', page: 'purchase-orders' },
+  { label: "General", section: "general" },
+  { label: "Specifications", section: "specifications" },
+  { label: "Tasks", page: "tasks" },
+  { label: "Sourcing", page: "sourcing" },
+  { label: "Execution", page: "execution" },
+  { label: "Reporting", page: "reporting" },
+  { label: "Costs", page: "costs" },
+  { label: "Purchase Orders", page: "purchase-orders" },
 ];
 
-// menu atas hanya tampil di halaman General, halaman lain punya tombol Back
-const isGeneral = computed(() => route.name === 'dry-dock-general');
+const isGeneral = computed(() => route.name === "dry-dock-general");
 
 async function reloadDock() {
   try {
@@ -36,23 +34,26 @@ async function reloadDock() {
   }
 }
 
-provide('dock', dock);
-provide('reloadDock', reloadDock);
+provide("dock", dock);
+provide("reloadDock", reloadDock);
 
 function notify(message) {
   toast.value = message;
-  setTimeout(() => (toast.value = ''), 1500);
+  setTimeout(() => (toast.value = ""), 1500);
 }
 
 async function open(tab) {
   if (!tab.section) {
-    await router.push({ name: `dry-dock-${tab.page}`, params: { id: props.id } });
+    await router.push({
+      name: `dry-dock-${tab.page}`,
+      params: { id: props.id },
+    });
     return;
   }
 
   activeSection.value = tab.section;
-  document.getElementById(tab.section)?.scrollIntoView({ behavior: 'smooth' });
-  notify('Success');
+  document.getElementById(tab.section)?.scrollIntoView({ behavior: "smooth" });
+  notify("Success");
 }
 
 onMounted(reloadDock);

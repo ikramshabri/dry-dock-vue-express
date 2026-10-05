@@ -1,9 +1,9 @@
 <script setup>
 defineProps({
-  tabs: { type: Array, required: true }, // [{ id, label }]
+  tabs: { type: Array, required: true },
   modelValue: { type: String, required: true },
 });
-defineEmits(['update:modelValue']);
+defineEmits(["update:modelValue"]);
 </script>
 
 <template>
